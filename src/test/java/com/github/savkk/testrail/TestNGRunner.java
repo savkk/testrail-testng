@@ -96,7 +96,7 @@ public class TestNGRunner {
         ArrayList<TestMethod> testMethods = new ArrayList<>();
 
         methodsAnnotatedWith.forEach(method -> testMethods.add(new TestMethod
-                (Integer.valueOf(method.getAnnotation(TmsLink.class).value().replaceFirst("C", "")), 1,
+                (Integer.valueOf(method.getAnnotation(TmsLink.class).value().replaceFirst("C", "")),
                         method.getDeclaringClass().getName(),
                         method.getName())));
 

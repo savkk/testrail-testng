@@ -9,7 +9,6 @@ import lombok.Data;
 @Builder
 public class TestMethod {
     private int caseId;
-    private int testId;
     private String className;
     private String methodName;
 }
