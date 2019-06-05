@@ -5,4 +5,4 @@
 Для запуска используется метод `main`, определенный в классе `TestNGRunner`. В pom-файле приведен пример профиля `testrail` запускающего данный метод из maven.
 В качестве входного параметра должен прийти `id` Test Run'а:
 
-`mvn clean test -Ptestrail -DrunId=1234`
+`mvn clean process-test-classes -Ptestrail -DrunId=1234`
