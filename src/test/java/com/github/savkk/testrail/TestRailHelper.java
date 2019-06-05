@@ -37,6 +37,10 @@ public final class TestRailHelper {
         Result result = new Result();
         result.setStatusId(statusId.getCode());
         result.setComment(System.getenv("BUILD_URL"));
+        Integer assignedToId = config.assignedToId();
+        if (assignedToId != null) {
+            result.setAssignedtoId(assignedToId);
+        }
         List<ResultField> customResultFields = TEST_RAIL.resultFields().list().execute();
         return TEST_RAIL.results().addForCase(runId, caseId, result, customResultFields).execute();
     }

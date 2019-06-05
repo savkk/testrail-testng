@@ -16,4 +16,7 @@ public interface TestRailConfig extends Config {
 
     @Key("testrail.password")
     String password();
+
+    @Key("testrail.assignedto_id")
+    Integer assignedToId();
 }
