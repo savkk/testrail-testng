@@ -33,6 +33,15 @@ public final class TestRailHelper {
         return testList.stream().collect(Collectors.toMap(Test::getCaseId, Test::getId));
     }
 
+    public static Map<Integer, Integer> getTestCasesIds(int runId, List<String> testIds) {
+        List<Test> testList = TEST_RAIL.tests().list(runId).execute();
+        return testList
+                .stream()
+                .filter(test ->
+                        testIds.contains(String.valueOf(test.getId())))
+                .collect(Collectors.toMap(Test::getCaseId, Test::getId));
+    }
+
     public static Result publishTestResult(int runId, int caseId, StatusId statusId) {
         Result result = new Result();
         result.setStatusId(statusId.getCode());

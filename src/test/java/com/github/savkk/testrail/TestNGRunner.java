@@ -19,20 +19,45 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class TestNGRunner {
+    private static final String TEST_IDS_SEPARATOR = ",";
     private static final XmlSuite.ParallelMode PARALLEL_MODE = XmlSuite.ParallelMode.NONE;
     private static final int THREAD_COUNT = 2;
     private static final int DATA_PROVIDER_THREAD_COUNT = 2;
 
     public static void main(String[] args) {
-        int runId = Integer.parseInt(System.getProperty("runId"));
+        String runIdParam = Optional
+                .ofNullable(System.getProperty("runId"))
+                .orElseThrow(() -> new IllegalStateException("Не указан обязательный параметр runId"));
+        int runId = Integer.parseInt(runIdParam);
         log.info("TestRail run id = {}", runId);
+
+        String testIdsParam = System.getProperty("testIds");
+        List<String> testIdsList = null;
+        if (testIdsParam != null && !testIdsParam.isEmpty()) {
+            String[] testIds = testIdsParam.split(TEST_IDS_SEPARATOR);
+            testIdsList = Arrays.stream(testIds).map(String::trim).collect(Collectors.toList());
+            log.info("TestRail selected tests: {}", testIdsList);
+        }
+
         if (System.getProperty("allure.results.directory") == null) {
             System.setProperty("allure.results.directory", "target/allure-results");
         }
 
-        Map<Integer, Integer> testsForRun = TestRailHelper.getTestCasesIds(runId);
+        Map<Integer, Integer> testsForRun;
+        if (testIdsList != null) {
+            testsForRun = TestRailHelper.getTestCasesIds(runId, testIdsList);
+        } else {
+            testsForRun = TestRailHelper.getTestCasesIds(runId);
+        }
 
-        List<TestMethod> methodsForRun = getTestMethodsForRun(testsForRun.keySet());
+        Set<Integer> cases = testsForRun.keySet();
+        log.info("TestRail cases for run: {}", cases);
+        List<TestMethod> methodsForRun = getTestMethodsForRun(cases);
+
+        if (methodsForRun.isEmpty()) {
+            throw new IllegalArgumentException("Нет автотестов для запуска");
+        }
+
         XmlSuite suite = getVirtualSuite("TestRail runId - " + runId, methodsForRun);
 
         TestNG testNG = new TestNG();
