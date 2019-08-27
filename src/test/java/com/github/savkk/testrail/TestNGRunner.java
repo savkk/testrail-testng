@@ -19,6 +19,10 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class TestNGRunner {
+    private static final XmlSuite.ParallelMode PARALLEL_MODE = XmlSuite.ParallelMode.NONE;
+    private static final int THREAD_COUNT = 2;
+    private static final int DATA_PROVIDER_THREAD_COUNT = 2;
+
     public static void main(String[] args) {
         int runId = Integer.parseInt(System.getProperty("runId"));
         log.info("TestRail run id = {}", runId);
@@ -56,7 +60,14 @@ public class TestNGRunner {
     private static XmlSuite getVirtualSuite(String suiteName, List<TestMethod> methodsForRun) {
         XmlSuite suite = new XmlSuite();
         suite.setName(suiteName);
+        suite.setAllowReturnValues(true);
 
+        if (PARALLEL_MODE != XmlSuite.ParallelMode.NONE) {
+            log.info("parallel mode - {}, thread count - {}, dataprovider thred count - {}", PARALLEL_MODE, THREAD_COUNT, DATA_PROVIDER_THREAD_COUNT);
+            suite.setParallel(PARALLEL_MODE);
+            suite.setThreadCount(THREAD_COUNT);
+            suite.setDataProviderThreadCount(DATA_PROVIDER_THREAD_COUNT);
+        }
         methodsForRun = methodsForRun.stream()
                 .sorted(Comparator.comparing(TestMethod::getClassName))
                 .collect(Collectors.toList());
