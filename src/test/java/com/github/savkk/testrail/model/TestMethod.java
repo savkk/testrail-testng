@@ -1,4 +1,4 @@
-package com.github.savkk.testrail;
+package com.github.savkk.testrail.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
