@@ -6,7 +6,16 @@
 
     <groupId>com.github.savkk</groupId>
     <artifactId>testrail-testng</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
+    <name>TestRail Integration</name>
+
+    <developers>
+        <developer>
+            <name>Anatoliy Surin</name>
+            <email>savkk@bk.ru</email>
+        </developer>
+    </developers>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -17,7 +26,6 @@
         <lombok.version>1.18.6</lombok.version>
         <allure-testng.version>2.10.0</allure-testng.version>
         <owner.version>1.0.10</owner.version>
-        <runId></runId>
     </properties>
     <dependencies>
         <dependency>
@@ -51,33 +59,5 @@
             <version>${owner.version}</version>
         </dependency>
     </dependencies>
-
-    <profiles>
-        <profile>
-            <id>testrail</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>exec-maven-plugin</artifactId>
-                        <version>1.6.0</version>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>java</goal>
-                                </goals>
-                                <phase>process-test-classes</phase>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <mainClass>com.github.savkk.testrail.TestRailRunner</mainClass>
-                            <cleanupDaemonThreads>false</cleanupDaemonThreads>
-                            <classpathScope>test</classpathScope>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 
 </project>

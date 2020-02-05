@@ -4,22 +4,16 @@ import com.codepine.api.testrail.TestRail;
 import com.codepine.api.testrail.model.Result;
 import com.codepine.api.testrail.model.ResultField;
 import com.codepine.api.testrail.model.Test;
-import org.aeonbits.owner.ConfigFactory;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public final class TestRailHelper {
-    private static final TestRailConfig config = ConfigFactory.create(TestRailConfig.class);
-    private static final TestRail TEST_RAIL = TestRail.builder(
-            config.url(),
-            config.user(),
-            config.password())
-            .build();
+public final class TestRailClient {
+    private final TestRail testRail;
 
-    private TestRailHelper() {
-        throw new IllegalAccessError("Helper class");
+    public TestRailClient(String endPoint, String user, String password) {
+        testRail = TestRail.builder(endPoint, user, password).build();
     }
 
     /**
@@ -28,30 +22,29 @@ public final class TestRailHelper {
      * @param runId - id тест рана
      * @return Map - ключ case id, значение test id
      */
-    public static Map<Integer, Integer> getTestCasesIds(Integer runId) {
-        List<Test> testList = TEST_RAIL.tests().list(runId).execute();
+    public Map<Integer, Integer> getTestCasesIds(Integer runId) {
+        List<Test> testList = testRail.tests().list(runId).execute();
         return testList.stream().collect(Collectors.toMap(Test::getCaseId, Test::getId));
     }
 
-    public static Map<Integer, Integer> getTestCasesIds(int runId, List<String> testIds) {
-        List<Test> testList = TEST_RAIL.tests().list(runId).execute();
+    public Map<Integer, Integer> getTestCasesIds(int runId, List<Integer> testIds) {
+        List<Test> testList = testRail.tests().list(runId).execute();
         return testList
                 .stream()
                 .filter(test ->
-                        testIds.contains(String.valueOf(test.getId())))
+                        testIds.contains(test.getId()))
                 .collect(Collectors.toMap(Test::getCaseId, Test::getId));
     }
 
-    public static Result publishTestResult(int runId, int caseId, StatusId statusId) {
+    public Result publishTestResult(int runId, int caseId, StatusId statusId, Integer assignedToId) {
         Result result = new Result();
         result.setStatusId(statusId.getCode());
         result.setComment(System.getenv("BUILD_URL"));
-        Integer assignedToId = config.assignedToId();
         if (assignedToId != null) {
             result.setAssignedtoId(assignedToId);
         }
-        List<ResultField> customResultFields = TEST_RAIL.resultFields().list().execute();
-        return TEST_RAIL.results().addForCase(runId, caseId, result, customResultFields).execute();
+        List<ResultField> customResultFields = testRail.resultFields().list().execute();
+        return testRail.results().addForCase(runId, caseId, result, customResultFields).execute();
     }
 
     public enum StatusId {

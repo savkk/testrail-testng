@@ -1,5 +1,7 @@
 package com.github.savkk.testrail;
 
+import com.github.savkk.testrail.config.TestRailConfig;
+import com.github.savkk.testrail.model.TestMethod;
 import io.qameta.allure.TmsLink;
 import lombok.extern.slf4j.Slf4j;
 import org.aeonbits.owner.ConfigFactory;
@@ -7,7 +9,7 @@ import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
-import org.testng.TestNG;
+import org.testng.IAlterSuiteListener;
 import org.testng.xml.XmlClass;
 import org.testng.xml.XmlInclude;
 import org.testng.xml.XmlSuite;
@@ -18,36 +20,32 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class TestNGRunner {
-    private static final String TEST_IDS_SEPARATOR = ",";
-    private static final XmlSuite.ParallelMode PARALLEL_MODE = XmlSuite.ParallelMode.NONE;
-    private static final int THREAD_COUNT = 2;
-    private static final int DATA_PROVIDER_THREAD_COUNT = 2;
+public class TestRailAlterSuiteListener implements IAlterSuiteListener {
+    private static final TestRailConfig config = ConfigFactory.create(TestRailConfig.class);
+    private final TestRailClient testRailClient = new TestRailClient(config.url(), config.user(), config.password());
 
-    public static void main(String[] args) {
-        String runIdParam = Optional
-                .ofNullable(System.getProperty("runId"))
+    private static final XmlSuite.ParallelMode PARALLEL_MODE = config.parallelMode();
+    private static final int THREAD_COUNT = config.threadCount();
+    private static final int DATA_PROVIDER_THREAD_COUNT = config.dataProviderThreadCount();
+
+    @Override
+    public void alter(List<XmlSuite> suites) {
+        if (!config.testrailEnabled()) {
+            return;
+        }
+        Integer runId = Optional
+                .ofNullable(config.runId())
                 .orElseThrow(() -> new IllegalStateException("Не указан обязательный параметр runId"));
-        int runId = Integer.parseInt(runIdParam);
         log.info("TestRail run id = {}", runId);
 
-        String testIdsParam = System.getProperty("testIds");
-        List<String> testIdsList = null;
-        if (testIdsParam != null && !testIdsParam.isEmpty()) {
-            String[] testIds = testIdsParam.split(TEST_IDS_SEPARATOR);
-            testIdsList = Arrays.stream(testIds).map(String::trim).collect(Collectors.toList());
-            log.info("TestRail selected tests: {}", testIdsList);
-        }
-
-        if (System.getProperty("allure.results.directory") == null) {
-            System.setProperty("allure.results.directory", "target/allure-results");
-        }
+        List<Integer> testIdsList = config.testIds();
+        log.info("TestRail selected tests: {}", testIdsList);
 
         Map<Integer, Integer> testsForRun;
         if (testIdsList != null) {
-            testsForRun = TestRailHelper.getTestCasesIds(runId, testIdsList);
+            testsForRun = testRailClient.getTestCasesIds(runId, testIdsList);
         } else {
-            testsForRun = TestRailHelper.getTestCasesIds(runId);
+            testsForRun = testRailClient.getTestCasesIds(runId);
         }
 
         Set<Integer> cases = testsForRun.keySet();
@@ -57,22 +55,8 @@ public class TestNGRunner {
         if (methodsForRun.isEmpty()) {
             throw new IllegalArgumentException("Нет автотестов для запуска");
         }
-
-        XmlSuite suite = getVirtualSuite("TestRail runId - " + runId, methodsForRun);
-
-        TestNG testNG = new TestNG();
-        testNG.setOutputDirectory("target/test-output");
-        log.debug("Set virtual suite with methods - {}", methodsForRun);
-        testNG.setXmlSuites(Collections.singletonList(suite));
-        log.debug("Set report listener");
-        testNG.setListenerClasses(Collections.singletonList(TestRailReportListener.class));
-        try {
-            testNG.run();
-        } catch (Exception e) {
-            log.error("", e);
-            System.exit(-1);
-        }
-        System.exit(testNG.getStatus());
+        suites.clear();
+        suites.add(getVirtualSuite("TestRail runId - " + runId, methodsForRun));
     }
 
     /**
@@ -132,7 +116,7 @@ public class TestNGRunner {
         ArrayList<TestMethod> testMethods = new ArrayList<>();
 
         methodsAnnotatedWith.forEach(method -> testMethods.add(new TestMethod
-                (Integer.valueOf(method.getAnnotation(TmsLink.class).value().replaceFirst("C", "")),
+                (Integer.parseInt(method.getAnnotation(TmsLink.class).value().replaceFirst("C", "")),
                         method.getDeclaringClass().getName(),
                         method.getName())));
 
