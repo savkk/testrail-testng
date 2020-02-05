@@ -12,6 +12,7 @@ import java.util.List;
         "classpath:testrail.properties"})
 public interface TestRailConfig extends Config {
 
+    @DefaultValue("false")
     @Key("testrail.enabled")
     boolean testrailEnabled();
 
@@ -37,7 +38,7 @@ public interface TestRailConfig extends Config {
     @Separator(",")
     List<Integer> testIds();
 
-    @DefaultValue("none")
+    @DefaultValue("NONE")
     @Key("parallel.mode")
     XmlSuite.ParallelMode parallelMode();
 
