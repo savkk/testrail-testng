@@ -19,6 +19,18 @@ public interface TestRailConfig extends Config {
     @Key("tests.package")
     String testsPackage();
 
+    @DefaultValue("NONE")
+    @Key("parallel.mode")
+    XmlSuite.ParallelMode parallelMode();
+
+    @DefaultValue("1")
+    @Key("parallel.thread.count")
+    Integer threadCount();
+
+    @DefaultValue("1")
+    @Key("parallel.data_provider_thread.count")
+    Integer dataProviderThreadCount();
+
     @Key("testrail.url")
     String url();
 
@@ -31,22 +43,10 @@ public interface TestRailConfig extends Config {
     @Key("testrail.assignedto_id")
     Integer assignedToId();
 
-    @Key("runId")
+    @Key("testrail.run_id")
     Integer runId();
 
     @Key("testIds")
     @Separator(",")
     List<Integer> testIds();
-
-    @DefaultValue("NONE")
-    @Key("parallel.mode")
-    XmlSuite.ParallelMode parallelMode();
-
-    @DefaultValue("1")
-    @Key("thread.count")
-    Integer threadCount();
-
-    @DefaultValue("1")
-    @Key("data.provider.thread.count")
-    Integer dataProviderThreadCount();
 }
