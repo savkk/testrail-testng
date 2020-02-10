@@ -2,10 +2,29 @@
 
 Для сопоставления тестов из TestRail и автотестов используется аннотация `@io.qameta.allure.TmsLink`
 
-В качестве входного параметра должен прийти `id` Test Run'а:
+Пример:
+```java
+    @Test
+    @TmsLink("15014467")
+    public void someTest() {
+        ...
+    }
+```
 
-`mvn clean process-test-classes -Ptestrail -DrunId=1234`
+Настройки:
 
-Если дополнительно указать параметр `testIds`, то из указанного Test Run'a будут запущены только тесты с указанными id:
+| Ключ       | Назначение     | 
+| :------------- | :----------: |
+| testrail.enabled | включить интеграцию |
+| tests.package | пакет, в котором расположены автотесты |
+| parallel.mode | режим параллельного запуска автотестов (TESTS, METHODS, CLASSES, INSTANCES, NONE). По-умолчанию NONE|
+| parallel.thread.count | количество потоков при параллельном запуске |
+| parallel.data_provider_thread.count | количество потоков для Data Provider при параллельном запуске |
+| testrail.url |  хост TestRail |
+| testrail.user | имя пользователя в TestRail |
+| testrail.password | пароль в TestRail |
+| testrail.assignedto_id | id пользователя на которого в TestRail будет назначен тест. Не обязательный параметр. |
+| testrail.run_id | id тест рана |
+| testrail.test_ids | id тестов из тест рана разделенные запятой. Если id не указаны, то будет осуществлен запуск всех тестов из тест рана |
 
-`mvn clean process-test-classes -Ptestrail -DrunId=1234 "-DtestIds=29878661,29878601"`
+Любую из настроек можно передать через System.properties, System.env или запись в testrail.properties, который необходимо разместить в classpath.
