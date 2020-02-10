@@ -2,7 +2,29 @@
 
 Для сопоставления тестов из TestRail и автотестов используется аннотация `@io.qameta.allure.TmsLink`
 
-Пример:
+## Подключение к проекту ##
+
+```xml
+<dependency>
+	<groupId>com.github.savkk</groupId>
+	<artifactId>testrail-testng</artifactId>
+	<version>1.0.0</version>
+</dependency>
+```
+
+Также необходимо добавить репозиторий:
+
+```xml
+<repositories>
+    <repository>
+        <id>com.github.savkk</id>
+        <url>https://dl.bintray.com/savkkkk/maven/</url>
+    </repository>
+</repositories>
+```
+
+### Пример: ###
+
 ```java
     @Test
     @TmsLink("15014467")
@@ -11,7 +33,7 @@
     }
 ```
 
-Настройки:
+## Настройки ##
 
 | Ключ       | Назначение     | 
 | :------------- | :----------: |
